@@ -1,12 +1,15 @@
-const src = `
-ああああああああああ
-いいいいいいいいいい
+import Head from 'next/head'
+import '../node_modules/spectre.css/dist/spectre.min.css'
 
-ああああああああああ
+const example = `
+そして教室じゅうはしばらく机の蓋をあけたりしめたり本を重ねたりする音がいっぱいでしたが、まもなくみんなはきちんと立って礼をすると教室を出ました。
 
 
-かかかかかかかかかか
-きききききききききき
+ジョバンニが学校の門を出るとき、同じ組の七、八人は家へ帰らずカムパネルラをまん中にして校庭の隅の桜の木のところに集っていました。
+それはこんやの星祭に青いあかりをこしらえて川へ流ながす烏瓜を取とりに行く相談らしかったのです。
+
+けれどもジョバンニは手を大きく振ふってどしどし学校の門を出て来ました。
+すると町の家々ではこんやの銀河の祭にいちいの葉の玉をつるしたり、ひのきの枝にあかりをつけたり、いろいろしたくをしているのでした。
 `
 
 //
@@ -16,13 +19,15 @@ const src = `
 class App extends React.Component {
   constructor(props) {
     super(props)
-    this.state = { source: src, generated: "" }
+    this.state = { source: '', generated: '' }
     this.handleChange = this.handleChange.bind(this)
     this.update = this.update.bind(this)
   }
 
   componentDidMount() {
-    this.update(this.state.source)
+    const document = parse(example)
+    const generated = format(document)
+    this.setState({ generated: generated })
   }
 
   handleChange(event) {
@@ -36,22 +41,33 @@ class App extends React.Component {
   }
 
   render = () => {
-    return (
+    return [
+      <Head>
+        <title>Novel Formatter</title>
+        <meta property="og:title" content="Novel Formatter" />
+        <meta property="og:description" content="ゲンロンＳＦ創作講座の梗概提出用に、テキストを整形します。" />
+        <meta property="og:image" content={require('./eyecatch.jpg')} />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:site" content="@bloodscooper" />
+        <meta name="twitter:title" content="Novel Formatter" />
+        <meta name="twitter:description" content="ゲンロンＳＦ創作講座の梗概提出用に、テキストを整形します。" />
+        <meta name="twitter:image" content={require('./eyecatch.jpg')} />
+      </Head>,
       <div className="container m-2">
         <div className="columns">
           <div className="column col-auto">
             <div className="form-group">
-              <textarea className="form-input" rows="10" cols="80"
+              <textarea className="form-input" rows="12" cols="80" placeholder={example}
                 value={this.state.source} onChange={this.handleChange} />
             </div>
             <div className="form-group">
-              <textarea className="form-input" rows="10" cols="80" readOnly
+              <textarea className="form-input" rows="12" cols="80" readOnly
                 value={this.state.generated} />
             </div>
           </div>
         </div>
       </div>
-    )
+    ]
   }
 }
 
@@ -179,8 +195,4 @@ function format(document) {
   return text
 }
 
-//
-// React
-//
-
-ReactDOM.render(<App />, document.querySelector('#app'))
+export default App;

@@ -1,0 +1,33 @@
+{
+  "name": "novel-formatter",
+  "version": "1.0.0",
+  "description": "novel-formatter prettifies synopsis for Genron SF Class",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next",
+    "build": "next build",
+    "deploy": "now"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/torufurukawa/novel-formatter.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/torufurukawa/novel-formatter/issues"
+  },
+  "homepage": "https://github.com/torufurukawa/novel-formatter#readme",
+  "dependencies": {
+    "@zeit/next-css": "^1.0.1",
+    "next": "^8.1.0",
+    "next-images": "^1.1.2",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "spectre.css": "^0.5.8"
+  },
+  "devDependencies": {
+    "now": "^15.6.2"
+  }
+}
