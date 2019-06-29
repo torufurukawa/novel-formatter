@@ -9,10 +9,14 @@ const src = `
 きききききききききき
 `
 
+//
+// React Components
+//
+
 class App extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {source: src, generated: ""}
+    this.state = { source: src, generated: "" }
     this.handleChange = this.handleChange.bind(this)
     this.update = this.update.bind(this)
   }
@@ -26,70 +30,9 @@ class App extends React.Component {
   }
 
   update(source) {
-    // extract lines and trim white spaces
-    const lines = source.split('\n').map((line) => line.trim())
-
-    // define position symbols
-    const beginning = Symbol('beginning')
-    const inParagraph = Symbol('inParagraph')
-    const endOfParagraph = Symbol('endOfParagraph')
-    const endOfSection = Symbol('endOfSection')
-
-    let position = beginning
-    const document = lines.reduce((document, line) => {
-      switch (position) {
-        case beginning:
-          if (line) {
-            document.pushSection(new Section(new Paragraph(line)))
-            position = inParagraph
-          }
-          break
-        case inParagraph:
-          if (line) {
-            document.lastSection.lastParagraph.pushLine(line)
-          } else {
-            position = endOfParagraph
-          }
-          break
-        case endOfParagraph:
-          if (line) {
-            document.lastSection.pushParagraph(new Paragraph(line))
-            position = inParagraph
-          } else {
-            position = endOfSection
-          }
-          break
-        case endOfSection:
-          if (line) {
-            document.pushSection(new Section(new Paragraph(line)))
-            position = inParagraph
-          }
-          break
-        default:
-          console.log('unknown status')
-      }
-      return document
-    }, new Document())
-
-    // format
-    const generated = document.sections.reduce((generated, section, i) => {
-      if (i > 0) {
-        generated += '\n\n'
-      }
-      generated += section.paragraphs.reduce((result, paragraph, i) => {
-        if (i > 0) {
-          result += '\n　'
-        }
-        result += paragraph.lines.reduce((result, line, i) => {
-          result += line
-          return result
-        })
-        return result
-      }, '')
-      return generated
-    }, '')
-
-    this.setState({ source: source, generated: generated})
+    const document = parse(source)
+    const generated = format(document)
+    this.setState({ source: source, generated: generated })
   }
 
   render = () => {
@@ -103,7 +46,7 @@ class App extends React.Component {
             </div>
             <div className="form-group">
               <textarea className="form-input" rows="10" cols="80" readOnly
-                value={this.state.generated}/>
+                value={this.state.generated} />
             </div>
           </div>
         </div>
@@ -111,6 +54,10 @@ class App extends React.Component {
     )
   }
 }
+
+//
+// Data structures
+//
 
 class Document {
   constructor() {
@@ -156,4 +103,84 @@ class Paragraph {
   }
 }
 
-ReactDOM.render(<App/>, document.querySelector('#app'))
+//
+// parser and dumper
+//
+
+function parse(text) {
+  // extract lines and trim white spaces
+  const lines = text.split('\n').map((line) => line.trim())
+  // define position status
+  const beginning = Symbol('beginning')
+  const inParagraph = Symbol('inParagraph')
+  const endOfParagraph = Symbol('endOfParagraph')
+  const endOfSection = Symbol('endOfSection')
+
+  let position = beginning
+  const document = lines.reduce((document, line) => {
+    switch (position) {
+      case beginning:
+        if (line) {
+          document.pushSection(new Section(new Paragraph(line)))
+          position = inParagraph
+        }
+        break
+      case inParagraph:
+        if (line) {
+          document.lastSection.lastParagraph.pushLine(line)
+        } else {
+          position = endOfParagraph
+        }
+        break
+      case endOfParagraph:
+        if (line) {
+          document.lastSection.pushParagraph(new Paragraph(line))
+          position = inParagraph
+        } else {
+          position = endOfSection
+        }
+        break
+      case endOfSection:
+        if (line) {
+          document.pushSection(new Section(new Paragraph(line)))
+          position = inParagraph
+        }
+        break
+      default:
+        console.log('unknown status')
+    }
+    return document
+  }, new Document())
+
+  return document
+}
+
+function format(document) {
+  const text = document.sections.reduce((text, section, i) => {
+    // insert a blank line between sections
+    if (i > 0) {
+      text += '\n\n'
+    }
+
+    text += section.paragraphs.reduce((text, paragraph, i) => {
+      // insert a space in fron of paragraph, except first paragaph in a section
+      if (i > 0) {
+        text += '\n　'
+      }
+
+      text += paragraph.lines.reduce((text, line, i) => {
+        return text + line
+      })
+      return text
+    }, '')
+    return text
+  }, '')
+
+  return text
+}
+
+//
+// React
+//
+
+ReactDOM.render(<App />, document.querySelector('#app'))
