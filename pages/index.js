@@ -25,15 +25,12 @@ class App extends React.Component {
     this.handleChange = this.handleChange.bind(this)
     this.update = this.update.bind(this)
     this.clear = this.clear.bind(this)
+    this.setExample = this.setExample.bind(this)
   }
 
   static async getInitialProps({ req }) {
     const host = req.headers.host
     return { host }
-  }
-
-  componentDidMount() {
-    this.clear()
   }
 
   handleChange(event) {
@@ -46,16 +43,18 @@ class App extends React.Component {
     this.setState({ source: source, generated: generated })
   }
 
+  setExample() {
+    this.update(example)
+  }
+
   clear() {
-    const document = parse(example)
-    const generated = format(document)
-    this.setState({ source: '', generated: generated })
+    this.update('')
   }
 
   render = () => {
     const imageURL = 'https://' + this.props.host + require('./eyecatch.jpg')
 
-const head = <Head>
+    const head = <Head>
       <title>Novel Formatter</title>
       <meta name="viewport" content="width=device-width,initial-scale=1" />
       <meta property="og:title" content="Novel Formatter" />
@@ -75,7 +74,6 @@ const head = <Head>
       <section className="navbar-section" />
     </header>
     const main = <div className="p-2" style={{ maxWidth: '580px', margin: '0 auto' }}>
-      {this.props.host}
       <p>ゲンロンSF創作講座の梗概提出用に、文章を整形します。</p>
       <p>
         ゲンロンSF創作講座の投稿サイトは、デフォルトで自動的に段落の最初を字下げし、かつ、段落間には空行を挿入して表示します。
@@ -86,18 +84,22 @@ const head = <Head>
       </p>
       <p style={{ fontSize: '80%' }}>
         会話のかぎかっこの行頭処理には対応していません。
-        私が実作までいけるまで、お待ち下さい。
+        <a href="https://twitter.com/bloodscooper">古川</a>が実作にいけるまで、お待ち下さい。
       </p>
 
       <div className="form-group" style={{ marginBottom: '1em' }}>
         <label>
           <span className="label label-rounded label-primary">Step 1</span><br />
-          ⬇ここに梗概原稿をペースト
+          梗概をペースト
         </label>
-        <textarea className="form-input mt-1" rows="10" placeholder={example}
+        <textarea className="form-input mt-1" rows="10" placeholder="ここに梗概をペースト"
           value={this.state.source} onChange={this.handleChange} />
         <div className="mt-1 text-right">
           <button className="btn btn-sm" onClick={this.clear}>
+            消去
+          </button>
+          &nbsp;
+          <button className="btn btn-sm" onClick={this.setExample}>
             消去して、例文を表示
           </button>
         </div>
@@ -106,7 +108,7 @@ const head = <Head>
       <div className="form-group">
         <label>
           <span className="label label-rounded label-primary">Step 2</span><br />
-          ⬇これをコピーして、ゲンロンSF創作講座の投稿サイトにペースト
+          コピーして、ゲンロンSF創作講座の投稿サイトにペースト
         </label>
         <textarea className="form-input mt-1" rows="8" readOnly
           value={this.state.generated} />
