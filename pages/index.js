@@ -1,15 +1,17 @@
 import Head from 'next/head'
+import {CopyToClipboard} from 'react-copy-to-clipboard';
 import '../node_modules/spectre.css/dist/spectre.min.css'
 
 const example = `
-そして教室じゅうはしばらく机の蓋をあけたりしめたり本を重ねたりする音がいっぱいでしたが、まもなくみんなはきちんと立って礼をすると教室を出ました。
+最初の段落です。
+後続する文は、最初の段落に含まれます。
+
+ひとつの空行をはさんで、次の段落を始めます。
+後続する文は、この段落に含まれます。
 
 
-ジョバンニが学校の門を出るとき、同じ組の七、八人は家へ帰らずカムパネルラをまん中にして校庭の隅の桜の木のところに集っていました。
-それはこんやの星祭に青いあかりをこしらえて川へ流ながす烏瓜を取とりに行く相談らしかったのです。
-
-けれどもジョバンニは手を大きく振ふってどしどし学校の門を出て来ました。
-すると町の家々ではこんやの銀河の祭にいちいの葉の玉をつるしたり、ひのきの枝にあかりをつけたり、いろいろしたくをしているのでした。
+ふたつの空行をはさんで、次のセクションを始めます。
+けれどもジョバンニは手を大きく振ってどしどし学校の門を出て来ました。
 `
 
 //
@@ -22,12 +24,16 @@ class App extends React.Component {
     this.state = { source: '', generated: '' }
     this.handleChange = this.handleChange.bind(this)
     this.update = this.update.bind(this)
+    this.clear = this.clear.bind(this)
+  }
+
+  static async getInitialProps({ req }) {
+    const host = req.headers.host
+    return { host }
   }
 
   componentDidMount() {
-    const document = parse(example)
-    const generated = format(document)
-    this.setState({ generated: generated })
+    this.clear()
   }
 
   handleChange(event) {
@@ -40,34 +46,78 @@ class App extends React.Component {
     this.setState({ source: source, generated: generated })
   }
 
+  clear() {
+    const document = parse(example)
+    const generated = format(document)
+    this.setState({ source: '', generated: generated })
+  }
+
   render = () => {
-    return [
-      <Head>
-        <title>Novel Formatter</title>
-        <meta property="og:title" content="Novel Formatter" />
-        <meta property="og:description" content="ゲンロンＳＦ創作講座の梗概提出用に、テキストを整形します。" />
-        <meta property="og:image" content={require('./eyecatch.jpg')} />
-        <meta name="twitter:card" content="summary" />
-        <meta name="twitter:site" content="@bloodscooper" />
-        <meta name="twitter:title" content="Novel Formatter" />
-        <meta name="twitter:description" content="ゲンロンＳＦ創作講座の梗概提出用に、テキストを整形します。" />
-        <meta name="twitter:image" content={require('./eyecatch.jpg')} />
-      </Head>,
-      <div className="container m-2">
-        <div className="columns">
-          <div className="column col-auto">
-            <div className="form-group">
-              <textarea className="form-input" rows="12" cols="80" placeholder={example}
-                value={this.state.source} onChange={this.handleChange} />
-            </div>
-            <div className="form-group">
-              <textarea className="form-input" rows="12" cols="80" readOnly
-                value={this.state.generated} />
-            </div>
-          </div>
+    const imageURL = 'https://' + this.props.host + require('./eyecatch.jpg')
+
+const head = <Head>
+      <title>Novel Formatter</title>
+      <meta name="viewport" content="width=device-width,initial-scale=1" />
+      <meta property="og:title" content="Novel Formatter" />
+      <meta property="og:description" content="ゲンロンSF創作講座の梗概提出用に、テキストを整形します。" />
+      <meta property="og:image" content={imageURL} />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:site" content="@bloodscooper" />
+      <meta name="twitter:title" content="Novel Formatter" />
+      <meta name="twitter:description" content="ゲンロンSF創作講座の梗概提出用に、テキストを整形します。" />
+      <meta name="twitter:image" content={imageURL} />
+    </Head>
+    const navbar = <header className="navbar bg-primary p-2">
+      <section className="navbar-section" />
+      <section className="navbar-center">
+        <span className="navbar-brand" >Novel Formatter</span>
+      </section>
+      <section className="navbar-section" />
+    </header>
+    const main = <div className="p-2" style={{ maxWidth: '580px', margin: '0 auto' }}>
+      {this.props.host}
+      <p>ゲンロンSF創作講座の梗概提出用に、文章を整形します。</p>
+      <p>
+        ゲンロンSF創作講座の投稿サイトは、デフォルトで自動的に段落の最初を字下げし、かつ、段落間には空行を挿入して表示します。
+        いかにも小説の作法に則ってない、と指摘されそうです。
+      </p>
+      <p>
+        このツールは、（私にとって）推敲しやすい書式の梗概を、投稿サイトにコピペできる書式に変換します。
+      </p>
+      <p style={{ fontSize: '80%' }}>
+        会話のかぎかっこの行頭処理には対応していません。
+        私が実作までいけるまで、お待ち下さい。
+      </p>
+
+      <div className="form-group" style={{ marginBottom: '1em' }}>
+        <label>
+          <span className="label label-rounded label-primary">Step 1</span><br />
+          ⬇ここに梗概原稿をペースト
+        </label>
+        <textarea className="form-input mt-1" rows="10" placeholder={example}
+          value={this.state.source} onChange={this.handleChange} />
+        <div className="mt-1 text-right">
+          <button className="btn btn-sm" onClick={this.clear}>
+            消去して、例文を表示
+          </button>
         </div>
       </div>
-    ]
+
+      <div className="form-group">
+        <label>
+          <span className="label label-rounded label-primary">Step 2</span><br />
+          ⬇これをコピーして、ゲンロンSF創作講座の投稿サイトにペースト
+        </label>
+        <textarea className="form-input mt-1" rows="8" readOnly
+          value={this.state.generated} />
+        <div className="mt-1 text-right">
+          <CopyToClipboard text={this.state.generated}>
+            <button className="btn btn-sm">コピー</button>
+          </CopyToClipboard>
+        </div>
+      </div>
+    </div>
+    return [head, navbar, main]
   }
 }
 
